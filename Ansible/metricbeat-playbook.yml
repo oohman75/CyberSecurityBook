@@ -1,0 +1,31 @@
+---
+- name: Config Web VM with Docker
+  hosts: webservers
+  become: yes
+  tasks:
+
+  - name: Download .deb metricbeat file
+    command: curl -L -O https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-7.4.0-amd64.deb
+
+  - name: Install Metricbeat
+    command: dpkg -i metricbeat-7.4.0-amd64.deb
+
+  - name: Copy playbook to Web Server
+    copy:
+      src: /etc/ansible/metricbeat-config.yml
+      dest: /etc/metricbeat/metricbeat.yml
+
+  - name: Enable Metricbeat
+    command: metricbeat modules enable docker
+
+  - name: Setup Metricbeat
+    command: metricbeat setup
+
+  - name: Start Metricbeat
+    command: service metricbeat start
+
+  - name: Enable metricbeat on startup
+    systemd:
+      name: metricbeat
+      enabled: yes
+
